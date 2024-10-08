@@ -13,6 +13,7 @@ from data_preprocessing import (
 from plot import visual_inspection, plot_clustered_data
 from feature_engineering import add_features
 from kmean_clustering import cluster_assets
+from feature_engineering import check_correction, vif_calculation
 
 
 def get_extrema(data: pd.DataFrame, distance: int = 5):
@@ -40,7 +41,7 @@ def get_extrema_previous_candles(
             continue
         data = dataset.iloc[idx - n_prev_candles : idx].copy()
         data.loc[:, "extrema_idx"] = idx
-        data.loc[:, "extrema_type"] = extrema_type
+        # data.loc[:, "extrema_type"] = extrema_type
         candles_arr.append(data)
 
     candles_df = pd.concat(candles_arr, ignore_index=True)
@@ -72,44 +73,39 @@ def run_data_pipeline():
 
     dataset = add_features(data=dataset)
 
-    columns_to_transform = [
-        "close",
+    # columns for removing has been chosen based on VIF calculation
+    columns_to_drop = [
+        "missing_partially",
+        "missing_ticks",
+        "close_time",
+        "base_asset_volume",
+        "quote_asset_volume",
+        "taker_buy_quote_asset_volume",
+        "taker_buy_base_asset_volume",
         "open",
         "high",
         "low",
-        "num_trades",
-        "quote_asset_volume",
-        "base_asset_volume",
-        "taker_buy_quote_asset_volume",
-        "taker_buy_base_asset_volume",
-        "return",
-        "average_base_asset_per_trade",
-        "average_quote_asset_per_trade",
-        "average_price",
-        "takers_average_price",
     ]
+    dataset.drop(columns=columns_to_drop, inplace=True)
+
+    index = ["symbol", "open_time"]
+    dataset.set_index(index, inplace=True)
+
     # Evaludate the best transformation for each column
     # for col in columns_to_transform:
     #     find_best_transformation_function(data=dataset.copy(), column_to_transform=col)
 
     dataset = transform_dataset(
         data=dataset.copy(),
-        column_to_transform=columns_to_transform,
+        column_to_transform=list(dataset.columns),
         transformation="power",
         plot_hist=False,
     )
 
-    columns_to_drop = [
-        "missing_partially",
-        "missing_ticks",
-        "close_time",
-    ]
-    dataset.drop(columns=columns_to_drop, inplace=True)
+    check_correction(dataset=dataset.copy(), plot=False)
+    vif_calculation(dataset=dataset.copy())
 
     # Resample the data to hourly frequency
-    index = ["symbol", "open_time"]
-    dataset.set_index(index, inplace=True)
-
     # print(f"Number of rows before resampling: {len(dataset)}")
     # dataset = resample_data(data=dataset.copy(), freq="h")
     # print(f"Number of rows after resampling: {len(dataset)}")
@@ -125,13 +121,13 @@ def run_data_pipeline():
     )
     print(f"Number of peaks dataset: {len(peaks_df)}")
 
-    valleys_df = get_extrema_previous_candles(
-        dataset=dataset,
-        indices=valleys,
-        n_prev_candles=n_previous_candles,
-        extrema_type="valley",
-    )
-    print(f"Number of valleys dataset: {len(valleys_df)}")
+    # valleys_df = get_extrema_previous_candles(
+    #     dataset=dataset,
+    #     indices=valleys,
+    #     n_prev_candles=n_previous_candles,
+    #     extrema_type="valley",
+    # )
+    # print(f"Number of valleys dataset: {len(valleys_df)}")
 
     peaks_df.set_index(["extrema_idx"], append=True, inplace=True)
     peaks_df.sort_index(inplace=True)
