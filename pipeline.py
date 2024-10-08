@@ -12,6 +12,7 @@ from data_preprocessing import (
 )
 from plot import visual_inspection
 from feature_engineering import add_features
+from kmean_clustering import cluster_assets
 
 
 def get_extrema(data: pd.DataFrame, distance: int = 5):
@@ -132,4 +133,11 @@ def run_data_pipeline():
     )
     print(f"Number of valleys dataset: {len(valleys_df)}")
 
-    return
+    peaks_df.set_index(["extrema_idx"], append=True, inplace=True)
+    peaks_df.sort_index(inplace=True)
+    peaks_df["order"] = peaks_df.groupby(level="extrema_idx").cumcount() + 1
+
+    peaks_df.drop(columns=["close"], inplace=True)
+
+    peaks_df = cluster_assets(dataset=peaks_df.copy())
+
