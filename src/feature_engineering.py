@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from plot import plot_correlation_matrix
-from utils import make_dir_if_not_exists
+from src.plot import plot_correlation_matrix
+from src.utils import make_dir_if_not_exists
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 

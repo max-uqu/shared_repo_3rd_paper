@@ -4,7 +4,7 @@ import numpy as np
 from typing import Optional
 from sklearn.preprocessing import StandardScaler, PowerTransformer
 
-from plot import plot_histogram
+from src.plot import plot_histogram
 
 
 def find_and_fill_missing_dates(data: pd.DataFrame, ticker_col: str):

@@ -2,18 +2,18 @@ import pandas as pd
 from scipy.signal import find_peaks
 import numpy as np
 
-from data_ingestion import read_btc_olhcv
-from data_preprocessing import (
+from src.data_ingestion import read_btc_olhcv
+from src.data_preprocessing import (
     preprocess_data,
     resample_data,
     detect_outliers,
     transform_dataset,
     find_best_transformation_function,
 )
-from plot import visual_inspection, plot_clustered_data
-from feature_engineering import add_features
-from kmean_clustering import cluster_assets
-from feature_engineering import check_correction, vif_calculation
+from src.plot import visual_inspection, plot_clustered_data
+from src.feature_engineering import add_features
+from src.kmean_clustering import cluster_assets
+from src.feature_engineering import check_correction, vif_calculation
 
 
 def get_extrema(data: pd.DataFrame, distance: int = 5):

@@ -3,7 +3,7 @@ import seaborn as sns
 import pandas as pd
 import scipy.stats as stats
 import numpy as np
-from utils import make_dir_if_not_exists
+from src.utils import make_dir_if_not_exists
 import matplotlib
 from scipy.stats import gaussian_kde
 
