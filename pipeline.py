@@ -10,7 +10,7 @@ from data_preprocessing import (
     transform_dataset,
     find_best_transformation_function,
 )
-from plot import visual_inspection
+from plot import visual_inspection, plot_clustered_data
 from feature_engineering import add_features
 from kmean_clustering import cluster_assets
 
@@ -141,3 +141,4 @@ def run_data_pipeline():
 
     peaks_df = cluster_assets(dataset=peaks_df.copy())
 
+    plot_clustered_data(peaks_df)

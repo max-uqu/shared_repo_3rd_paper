@@ -3,6 +3,11 @@ import seaborn as sns
 import pandas as pd
 import scipy.stats as stats
 import numpy as np
+from utils import make_dir_if_not_exists
+import matplotlib
+from scipy.stats import gaussian_kde
+
+PLOT_PATH = "data/plots"
 
 
 def plot_line_chart(
@@ -102,3 +107,64 @@ def visual_inspection(
         x_col=comparison_col,
         y_col=column_to_plot,
     )
+
+
+def plot_correlation_matrix(correlation_matrix: pd.DataFrame):
+    plt.figure(figsize=(10, 10))
+
+    # plot the heatmap
+    sns.heatmap(correlation_matrix, annot=False, cmap="coolwarm", fmt=".2f")
+
+    # Adjust layout for readability
+    plt.xticks(rotation=45, ha="right")
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()
+
+
+def plot_pairplot(data: pd.DataFrame):
+    print("Creating the pairplot...")
+    pairplot = sns.pairplot(data=data, hue="cluster", palette="viridis")
+
+    print("Saving the pairplot...")
+    pairplot.figure.savefig(f"{PLOT_PATH}/pairplot.png")
+    print("Pairplot saved.")
+
+
+def plot_clustermap(data: pd.DataFrame):
+    print("Creating the clustermap...")
+    cluster_plot = sns.clustermap(data=data, cmap="viridis", standard_scale=1)
+
+    print("Saving the clusterplot...")
+    cluster_plot.savefig(f"{PLOT_PATH}/clusterplot.png")
+    print("Clusterplot saved.")
+
+
+def plot_clustered_data(data: pd.DataFrame):
+    print("Setting non-interactive backend...")
+    matplotlib.use("Agg")
+
+    data_cleaned = data.dropna().replace([np.inf, -np.inf], np.nan).dropna()
+    data_cleaned = data_cleaned.apply(pd.to_numeric, errors="coerce")
+
+    print(f"Data shape: {data.shape}")
+    print("Getting a sample of the data...")
+    sample_data = data_cleaned.tail(500).copy()
+
+    # Find zero-variance columns
+    # Columns with zero variance (all values are the same)
+    # can cause issues with distance calculations.
+    zero_variance_columns = sample_data.columns[sample_data.nunique() <= 1]
+
+    # Drop zero-variance columns
+    if len(zero_variance_columns) > 0:
+        print("Zero variance columns:", zero_variance_columns.tolist())
+        sample_data = sample_data.drop(columns=zero_variance_columns)
+
+    print("Checking if directory exists...")
+    make_dir_if_not_exists(path=PLOT_PATH)
+
+    plot_pairplot(data=sample_data.copy())
+    plot_clustermap(data=sample_data.copy())
