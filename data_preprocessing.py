@@ -107,11 +107,6 @@ def detect_outliers(data: pd.DataFrame):
     return data
 
 
-def visualize_outliers(data: pd.DataFrame):
-    # line plot for the close price
-    pass
-
-
 def find_best_transformation_function(data: pd.DataFrame, column_to_transform: str):
     print(f"Column to transform: {column_to_transform}")
     print("---------------------------------------------------------------------")
